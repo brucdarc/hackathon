@@ -2,7 +2,7 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: -- 🦉
 
 
 contract Declarations is ERC20{
@@ -22,7 +22,9 @@ contract Declarations is ERC20{
     
     
       struct Proposal{
-          bytes32 transactionData;
+          address sendTo;
+          bytes transactionData;
+          uint256 value;
           uint256 timestamp;
           uint256 votesFor;
           uint256 votesAgainst;
@@ -64,21 +66,33 @@ contract Declarations is ERC20{
           uint256 ratificationsAgainst;
       }
       
+      struct OffChainProposalSubmission{
+          address submitter;
+          uint256 ratificationsFor;
+          uint256 ratificationsAgainst;
+      }
+      
+      
       uint256 subrewardsPerYear;
       uint256 ratrewardsPerYear;
-      uint256 constant VotingTime = 7;
+      uint256 constant VotingTime = 7 days;
       uint256 constant RatificationTime = 2 days;
       uint256 constant VotingPlusRatificationTime = 9 days; //use a const instead of using gas to add voting and ratification time when the combination of them is needed
+      uint256 constant BondCooldownAfterVoting = 11 days; //add a reasonable delta of 2 days in case there is some delay of submitters submitting proposals to other chains
 
 
 
       uint256[] chainIDs = [1, 1666600000];
       
+      mapping(bytes32 => OffChainProposalSubmission) OffChainProposalSubmissions;
+      
       mapping(bytes32 => OffChainVoteSubmission) SubmissionsUpForRatification;
       
       mapping(uint256 => bool) chainVotesCounted;
       
-      mapping(address => mapping(bytes32 => uint64)) Ratifications; //All Ratifications for a specific ratifier. 0 = no vote, 1 = voted for, 2 = voted against
+      mapping(address => mapping(bytes32 => uint64)) ProposalRatifications; //All proposal Ratifications for a specific ratifier. 0 = no vote, 1 = voted for, 2 = voted against
+
+      mapping(address => mapping(bytes32 => uint64)) VoteRatifications; //All vote Ratifications for a specific ratifier. 0 = no vote, 1 = voted for, 2 = voted against
       
       mapping(address => bytes32) ChainDecisionSubmission; //bytes32 is a hash of the important data of the Decision. chainid, votesFor, votesAgainst, transactionData
       

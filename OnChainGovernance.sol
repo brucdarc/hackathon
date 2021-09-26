@@ -1,7 +1,7 @@
 
 pragma solidity ^0.8.7;
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: -- 🦉
 
 import "./Declarations.sol";
 
@@ -49,7 +49,7 @@ contract OnChainGovernance is Declarations{
               );
               
           require(
-              RatifierBond[msg.sender].BondEndTimestamp + VotingPlusRatificationTime < block.timestamp,
+              RatifierBond[msg.sender].BondEndTimestamp + BondCooldownAfterVoting < block.timestamp,
               "Bond Unlock Time Not Expired"
               );
               
@@ -66,7 +66,7 @@ contract OnChainGovernance is Declarations{
               );
               
           require(
-              SubmitterBond[msg.sender].BondEndTimestamp + VotingPlusRatificationTime < block.timestamp,
+              SubmitterBond[msg.sender].BondEndTimestamp + BondCooldownAfterVoting < block.timestamp,
               "Bond Unlock Time Not Expired"
               );
               
@@ -78,7 +78,9 @@ contract OnChainGovernance is Declarations{
       
       
       function submitProposal(
-      bytes32 _transactionData
+      bytes calldata _transactionData,
+      address _sendTo,
+      uint256 _value
       )
       external
       {
@@ -107,7 +109,9 @@ contract OnChainGovernance is Declarations{
           
           
           Proposals [id] = Proposal({
+              sendTo : _sendTo,
               transactionData : _transactionData,
+              value : _value,
               timestamp : block.timestamp,
               votesFor : 0,
               votesAgainst : 0
